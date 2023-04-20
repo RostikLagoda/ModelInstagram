@@ -10,8 +10,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
 
      User findByUserName(String username);
-
     boolean existsByUserName(String username);
-
-    User saveProfileDto(User user1);
+    //User saveProfileDto(User user1);
+    void deleteUserByUserName(String userName);
 }

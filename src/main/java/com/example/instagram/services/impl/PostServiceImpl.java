@@ -24,7 +24,7 @@ public class PostServiceImpl implements PostService {
                 .authorOfThePost(authorOfThePost)
                 .image(image)
                 .build();
-        return postRepository.savePost(post);
+        return postRepository.save(post);
     }
 
     @Override
@@ -43,27 +43,27 @@ public class PostServiceImpl implements PostService {
         return null;
     }
 
-    @Override
-    public PostDto mapPostToPostDto(Post post1) {
-        return PostDto.builder()
-                .title(post1.getTitle())
-                .description(post1.getDescription())
-                .authorOfThePost(post1.getAuthorOfThePost())
-                .image(post1.getImage())
-                .build();
-    }
+//    @Override
+//    public PostDto mapPostToPostDto(Post post1) {
+//        return PostDto.builder()
+//                .title(post1.getTitle())
+//                .description(post1.getDescription())
+//                .authorOfThePost(post1.getAuthorOfThePost())
+//                .image(post1.getImage())
+//                .build();
+//    }
 
-    @Override
-    public void mapPostDtoToPost(Post post1, PostDto PostDto) {
-        post1.setTitle(PostDto.getTitle());
-        post1.setDescription(PostDto.getDescription());
-        post1.setAuthorOfThePost(PostDto.getAuthorOfThePost());
-        post1.setImage(PostDto.getImage());
-    }
+//    @Override
+//    public void mapPostDtoToPost(Post post1, PostDto PostDto) {
+//        post1.setTitle(PostDto.getTitle());
+//        post1.setDescription(PostDto.getDescription());
+//        post1.setAuthorOfThePost(PostDto.getAuthorOfThePost());
+//        post1.setImage(PostDto.getImage());
+//    }
 
-    @Override
-    public Post savePostDto(Post post1) {
-        return postRepository.savePostDto(post1);
-    }
+//    @Override
+//    public Post savePostDto(Post post1) {
+//        return postRepository.savePostDto(post1);
+//    }
 }
 

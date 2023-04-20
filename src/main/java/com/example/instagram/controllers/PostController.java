@@ -3,7 +3,6 @@ package com.example.instagram.controllers;
 import com.example.instagram.entity.Post;
 import com.example.instagram.services.impl.PostServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,7 +32,7 @@ public class PostController {
         return ResponseEntity.ok(postService.getByTitle(title));
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/deletePost")
     public ResponseEntity<?> deleteByTitle(@RequestParam String title){
         return postService.deletePostByTitle(title);
     }

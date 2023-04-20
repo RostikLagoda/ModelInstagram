@@ -1,6 +1,5 @@
 package com.example.instagram.services.impl;
 
-import com.example.instagram.dto.ProfileDto;
 import com.example.instagram.entity.User;
 import com.example.instagram.entity.enums.Role;
 import com.example.instagram.exception.UserNotFoundEx;
@@ -8,6 +7,7 @@ import com.example.instagram.repositories.UserRepository;
 import com.example.instagram.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,18 +28,18 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     private BCryptPasswordEncoder passwordEncoder;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUserName(username);
+    public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
+        return userRepository.findByUserName(userName);
     }
 
     @Override
-    public User saveUser(String username, String password) {
-        if (userRepository.existsByUserName(username)) {
-            throw new UserNotFoundEx(String.format("User with username %s not found", username));
+    public User saveUser(String userName, String password) {
+        if (userRepository.existsByUserName(userName)) {
+            throw new UserNotFoundEx(String.format("User with username %s not found", userName));
         }
 
         User user = User.builder()
-                .userName(username)
+                .userName(userName)
                 .userPassword(passwordEncoder.encode(password))
                 .roleSet(Set.of(Role.USER))
                 .build();
@@ -53,13 +53,12 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     }
 
     @Override
-    public User saveAdmin(String username, String password) {
-        if (userRepository.existsByUserName(username)) {
-            throw new UserNotFoundEx(String.format("User with username %s not found", username));
+    public User saveAdmin(String userName, String password) {
+        if (userRepository.existsByUserName(userName)) {
+            throw new UserNotFoundEx(String.format("User with username %s not found", userName));
         }
-
         User user = User.builder()
-                .userName(username)
+                .userName(userName)
                 .userPassword(passwordEncoder.encode(password))
                 .roleSet(Set.of(Role.ADMIN))
                 .build();
@@ -72,33 +71,37 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return userRepository.findByUserName(userName);
     }
 
+    @Override
+    public ResponseEntity<?> deleteUser(String userName){
+       userRepository.deleteUserByUserName(userName);
+        return null;
+    }
+//    @Override
+//    public ProfileDto mapUserToProfileDto(User user1) {
+//        return ProfileDto.builder()
+//
+//                .userName(user1.getUsername())
+//                .userPassword(user1.getUserPassword())
+//                .email(user1.getEmail())
+//                .country(user1.getCountry())
+//                .numberPhone(user1.getNumberPhone())
+//                .build();
+//    }
+//
+//    public void mapProfileDtoToUser(User user1, ProfileDto profileDto) {
+//        user1.setUserName(profileDto.getUserName());
+//        user1.setUserPassword(profileDto.getUserPassword());
+//        user1.setEmail(profileDto.getEmail());
+//        user1.setCountry(profileDto.getCountry());
+//        user1.setNumberPhone(profileDto.getNumberPhone());
+//    }
+
+//    public User saveProfile(User user1) {
+//        return userRepository.saveProfileDto(user1);
+//    }
 
     @Override
-    public ProfileDto mapUserToProfileDto(User user1) {
-        return ProfileDto.builder()
-
-                .userName(user1.getUsername())
-                .userPassword(user1.getUserPassword())
-                .email(user1.getEmail())
-                .country(user1.getCountry())
-                .numberPhone(user1.getNumberPhone())
-                .build();
-    }
-
-    public void mapProfileDtoToUser(User user1, ProfileDto profileDto) {
-        user1.setUserName(profileDto.getUserName());
-        user1.setUserPassword(profileDto.getUserPassword());
-        user1.setEmail(profileDto.getEmail());
-        user1.setCountry(profileDto.getCountry());
-        user1.setNumberPhone(profileDto.getNumberPhone());
-    }
-
-    public User saveProfile(User user1) {
-        return userRepository.saveProfileDto(user1);
-    }
-
-    @Override
-    public boolean existByUserName(String username) {
-        return userRepository.existsByUserName(username);
+    public boolean existByUserName(String userName) {
+        return userRepository.existsByUserName(userName);
     }
 }

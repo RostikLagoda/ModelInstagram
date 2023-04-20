@@ -12,7 +12,7 @@ public interface PostService {
     List<Post> getAllPosts();
     Post getByTitle(String title);
     ResponseEntity<?> deletePostByTitle(String title);
-    PostDto mapPostToPostDto(Post post1);
-    void mapPostDtoToPost(Post post1, PostDto PostDto);
-    Post savePostDto(Post post11);
+//    PostDto mapPostToPostDto(Post post1);
+//    void mapPostDtoToPost(Post post1, PostDto PostDto);
+   // Post savePostDto(Post post11);
 }
