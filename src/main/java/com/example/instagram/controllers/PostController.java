@@ -1,9 +1,12 @@
 package com.example.instagram.controllers;
 
+import com.example.instagram.dto.post.SavePostDto;
 import com.example.instagram.entity.Post;
 import com.example.instagram.services.impl.PostServiceImpl;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,18 +14,22 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/post")
+@Validated
 public class PostController {
 
     @Autowired
     private PostServiceImpl postService;
 
-    @PostMapping("/save")
-    public ResponseEntity<Post> savePost(@RequestParam String title, @RequestParam String description,
-                                   @RequestParam String authorOfThePost, @RequestParam String image){
-      return ResponseEntity.ok(postService.savePost(title, description, authorOfThePost, image));
+    @Autowired
+    private ModelMapper mapper;
+
+    @PostMapping("/save/post")
+    public ResponseEntity<?> savePost(@RequestBody SavePostDto post, @RequestParam String userName){
+
+      return ResponseEntity.ok(postService.savePost(post, userName));
     }
 
-    @GetMapping("/get/all")
+    @GetMapping("/get/allPost")
     public ResponseEntity<List<Post>> getAll(){
         return ResponseEntity.ok(postService.getAllPosts());
     }
@@ -33,7 +40,12 @@ public class PostController {
     }
 
     @DeleteMapping("/deletePost")
-    public ResponseEntity<?> deleteByTitle(@RequestParam String title){
-        return postService.deletePostByTitle(title);
+    public void deleteByTitle(@RequestParam String title){
+         postService.deletePostByTitle(title);
+    }
+
+    @PutMapping("/update/post")
+    public ResponseEntity<?> update(@RequestBody Post updatedPost, @RequestParam Long postId){
+         return ResponseEntity.ok(postService.update(updatedPost, postId));
     }
 }

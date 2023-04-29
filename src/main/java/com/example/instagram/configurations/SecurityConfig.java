@@ -25,9 +25,17 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((auth) -> {
-                            auth.requestMatchers(HttpMethod.POST, "/user/save").permitAll()
-                                    .requestMatchers(HttpMethod.GET, "/user/get/all").hasAuthority(Role.ADMIN.getAuthority())
-                                    .requestMatchers(HttpMethod.POST, "/user/save/admin").permitAll()
+                            auth.requestMatchers(HttpMethod.POST, "/user/save/user").permitAll()
+                                    .requestMatchers(HttpMethod.GET, "/user/get/all").permitAll()
+                                    .requestMatchers(HttpMethod.POST, "/user/save/admin").hasAuthority(Role.ADMIN.getAuthority())
+                                    .requestMatchers(HttpMethod.GET, "/user/profile").permitAll()
+                                    .requestMatchers(HttpMethod.POST, "/user/registration").permitAll()
+                                    .requestMatchers(HttpMethod.POST,"/user/auth").permitAll()
+                                    .requestMatchers(HttpMethod.DELETE, "/user/delete/user").hasAuthority(Role.ADMIN.getAuthority())
+                                    .requestMatchers(HttpMethod.POST, "/post/save").permitAll()
+                                    .requestMatchers(HttpMethod.GET, "/post/get/allPost").permitAll()
+                                    .requestMatchers(HttpMethod.GET, "/post/get/title").permitAll()
+                                    .requestMatchers(HttpMethod.DELETE, "/post/deletePost").permitAll()
                                     .anyRequest()
                                     .authenticated();
                         }

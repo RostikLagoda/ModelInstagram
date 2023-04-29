@@ -1,20 +1,18 @@
 package com.example.instagram.services;
 
+import com.example.instagram.dto.user.ProfileDto;
 import com.example.instagram.entity.User;
-import org.springframework.http.ResponseEntity;
 
 
 import java.util.List;
 
 public interface UserService {
 
-    User saveUser(String userName, String password);
-    List<User> getAll();
-    User saveAdmin(String userName, String password);
+    User saveUser(User user);
+    List<User> getAllUsers();
+    User saveProfile(User user);
+    User saveAdmin(User user);
     User getByUserName(String userName);
-//    ProfileDto mapUserToProfileDto(User user1);
-//    void mapProfileDtoToUser(User user1, ProfileDto profileDto);
-    //User saveProfile(User user1);
+    User deleteUser(String userName);
     boolean existByUserName(String userName);
-    ResponseEntity<?> deleteUser(String userName);
 }

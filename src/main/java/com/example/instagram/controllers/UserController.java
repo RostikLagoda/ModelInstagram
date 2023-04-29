@@ -1,87 +1,100 @@
 package com.example.instagram.controllers;
 
-import com.example.instagram.dto.ProfileDto;
+import com.example.instagram.dto.user.ProfileDto;
+import com.example.instagram.dto.user.ResponseUserDto;
 import com.example.instagram.entity.User;
 import com.example.instagram.services.impl.UserServiceImpl;
 import jakarta.servlet.http.HttpSession;
+import org.hibernate.validator.constraints.Length;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping("/user")
+@Validated
 public class UserController {
 
     @Autowired
     private UserServiceImpl userService;
 
-    @PostMapping("/save")
-    public ResponseEntity<User> saveUser(@RequestParam String username,
-                                     @RequestParam String password) {
-        return ResponseEntity.ok(userService.saveUser(username, password));
+    @Autowired
+    private ModelMapper mapper;
+
+    @PostMapping("/save/user")
+    public ResponseEntity<User> saveUser(@RequestBody ProfileDto profileDto) {
+        User save = userService.saveUser(mapper.map(profileDto, User.class));
+        return new ResponseEntity<>(mapper.map(save, User.class), HttpStatus.OK);
     }
 
     @GetMapping("/get/all")
-    public ResponseEntity<List<User>> getAll() {
-        return ResponseEntity.ok(userService.getAll());
+    public ResponseEntity<List<User>> getAll(Model model, @RequestBody ProfileDto profileDto) {
+        if(userService.getAllUsers().isEmpty()){
+            model.addAttribute("message", "Пользователи не найдены");
+        }
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
     @PostMapping("/save/admin")
-    public ResponseEntity<User> saveAdmin(@RequestParam String username,
-                                          @RequestParam String password) {
-        return ResponseEntity.ok(userService.saveAdmin(username, password));
+    public ResponseEntity<User> saveAdmin(@RequestBody ProfileDto profileDto) {
+        User save = userService.saveAdmin(mapper.map(profileDto, User.class));
+        return new ResponseEntity<>(mapper.map(save, User.class), HttpStatus.OK);
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<Model> profile(HttpSession session, Model model) {
-        User user = (User) session.getAttribute("user");
-        User user1 = userService.getByUserName(user.getUsername());
-//        ProfileDto profileDto = userService.mapUserToProfileDto(user1);
-        return (ResponseEntity<Model>) model.addAttribute("user",user);
+    public ResponseEntity<?> profile(@RequestBody User user1, @RequestBody ProfileDto profileDto, Model model) {
+        if(userService.existByUserName(user1.getUsername())){
+            model.addAttribute("message", "Пользаватель не найден");
+        }
+        User profile = userService.saveProfile(mapper.map(profileDto, User.class));
+        return new ResponseEntity<>(mapper.map(profile, User.class), HttpStatus.OK);
     }
 
-//    @PostMapping("/profile")
-//    public ResponseEntity<Model> profile(@ModelAttribute(value = "user") ProfileDto profileDto, Model model, HttpSession session) {
-//        User user = (User) session.getAttribute("user");
-//        User user1 = userService.getByUserName(user.getUsername());
-//        userService.mapProfileDtoToUser(user1, profileDto);
-//        userService.saveProfile(user1);
-//        session.setAttribute("user", user1);
-//        model.addAttribute("message", "Обновление произошло успешно");
-//        return (ResponseEntity<Model>) model.addAttribute("user", profileDto);
-//    }
+    @PutMapping("/update/profile")
+    public ResponseEntity<?> updateProfile(@RequestBody User user, @RequestBody ProfileDto profileDto, Model model){
+        if(userService.existByUserName(user.getUsername())){
+            model.addAttribute("massege", "Профиль не найден");
+        }
+        User updateProfile = userService.saveProfile(mapper.map(profileDto, User.class));
+        return new ResponseEntity<>(mapper.map(updateProfile, User.class), HttpStatus.OK) ;
+    }
 
     @PostMapping("/registration")
-    public ResponseEntity<User> registration(String username, String password, Model model) {
-        if (userService.existByUserName(username)) {
+    public ResponseEntity<User> registration(@RequestBody User user, Model model) {
+        if (userService.existByUserName(user.getUsername())) {
             model.addAttribute("message", "Пользаватель уже существует");
         } else {
-           return ResponseEntity.ok( userService.saveUser(username, password));
+           return ResponseEntity.ok( userService.saveUser(user));
         }
-        return ResponseEntity.ok(userService.getByUserName(username));
+        return ResponseEntity.ok(userService.getByUserName(user.getUsername()));
     }
 
     @PostMapping("/auth")
     public ResponseEntity<User> authorization(String username, String password, Model model, HttpSession mod) {
         if (!userService.existByUserName(username)) {
-            model.addAttribute("message", "Пользователя не существует");
+            model.addAttribute("message", "Пользователя не существует.");
         } else {
             User user = userService.getByUserName(username);
             if (user.getPassword().equals(password)) {
                mod.setAttribute("user", user);
             } else {
-                model.addAttribute("message", "Данные введены не правильно");
+                model.addAttribute("message", "Данные введены не правильно.");
             }
         }
         return ResponseEntity.ok(userService.getByUserName(username));
     }
 
-    @DeleteMapping("/deleteUser")
-    public ResponseEntity<?> deleteByName(@RequestParam String userName){
-        return userService.deleteUser(userName);
+    @DeleteMapping("/{username}")
+    public ResponseEntity<?> deleteByName(@PathVariable @Length(min = 1, max = 255) String username) {
+        User deletedUser = userService.deleteUser(username);
+        return new ResponseEntity<>(mapper.map(deletedUser, ResponseUserDto.class), HttpStatus.OK);
     }
 }
 

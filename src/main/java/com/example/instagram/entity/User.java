@@ -1,6 +1,7 @@
 package com.example.instagram.entity;
 
 import com.example.instagram.entity.enums.Role;
+import com.example.instagram.entity.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 @Builder
@@ -30,9 +32,16 @@ public class User implements UserDetails {
     private String country;
     private String numberPhone;
 
+    @OneToMany
+    private List<Post> post;
+
+
     @Enumerated(EnumType.STRING)
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<Role> roleSet;
+
+    @Enumerated(value = EnumType.STRING)
+    private UserStatus status;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -2,106 +2,115 @@ package com.example.instagram.services.impl;
 
 import com.example.instagram.entity.User;
 import com.example.instagram.entity.enums.Role;
-import com.example.instagram.exception.UserNotFoundEx;
+import com.example.instagram.entity.enums.UserStatus;
+import com.example.instagram.exception.PostException;
+import com.example.instagram.exception.UserException;
+import com.example.instagram.repositories.CommentRepository;
+import com.example.instagram.repositories.PostRepository;
 import com.example.instagram.repositories.UserRepository;
 import com.example.instagram.services.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
-public class UserServiceImpl implements UserDetailsService, UserService {
+@Slf4j
+public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private PostRepository postRepository;
+    @Autowired
+    private CommentRepository commentRepository;
 
     @Autowired
     @Lazy
     private BCryptPasswordEncoder passwordEncoder;
 
     @Override
-    public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
-        return userRepository.findByUserName(userName);
-    }
-
-    @Override
-    public User saveUser(String userName, String password) {
-        if (userRepository.existsByUserName(userName)) {
-            throw new UserNotFoundEx(String.format("User with username %s not found", userName));
+    public User saveUser(User user) {
+        log.info("Request save User {}", user.getUsername());
+        if (userRepository.existsByUserName(user.getUsername())) {
+            throw new UserException(String.format("User with username %s not found", user.getUsername()));
         }
-
-        User user = User.builder()
-                .userName(userName)
-                .userPassword(passwordEncoder.encode(password))
+        User user1 = User.builder()
+                .status(UserStatus.ACTIVE)
+                .userName(user.getUsername())
+                .userPassword(passwordEncoder.encode(user.getPassword()))
                 .roleSet(Set.of(Role.USER))
                 .build();
-
-        return userRepository.save(user);
+        return userRepository.save(user1);
     }
 
     @Override
-    public List<User> getAll() {
-        return userRepository.findAll();
-    }
-
-    @Override
-    public User saveAdmin(String userName, String password) {
-        if (userRepository.existsByUserName(userName)) {
-            throw new UserNotFoundEx(String.format("User with username %s not found", userName));
+    public User saveAdmin(User user) {
+        log.info("Request save Admin {}", user.getUsername());
+        if (userRepository.existsByUserName(user.getUsername())) {
+            throw new UserException(String.format("Admin with username %s not found", user.getUsername()));
         }
-        User user = User.builder()
-                .userName(userName)
-                .userPassword(passwordEncoder.encode(password))
+        User user1 = User.builder()
+                .status(UserStatus.ACTIVE)
+                .userName(user.getUsername())
+                .userPassword(passwordEncoder.encode(user.getPassword()))
                 .roleSet(Set.of(Role.ADMIN))
                 .build();
+        return userRepository.save(user1);
+    }
 
-        return userRepository.save(user);
+    @Override
+    public User saveProfile(User user) {
+        log.info("Request save profile {}", user.getUsername());
+        if(userRepository.existsByUserName(user.getUsername())) {
+            throw new UserException(String.format("Admin with username %s not found", user.getUsername()));
+        }
+        User user1 = User.builder()
+                .email(user.getEmail())
+                .country(user.getCountry())
+                .numberPhone(user.getNumberPhone())
+                .build();
+        return userRepository.save(user1);
+    }
+
+
+
+    @Override
+    public List<User> getAllUsers() {
+        log.info("Request All User");
+        return Optional.of(userRepository.findAll())
+                .orElseThrow(() -> new PostException("Users not found"));
     }
 
     @Override
     public User getByUserName(String userName) {
+        log.info("Request get User by user name {}", userName);
+        if(userRepository.existsByUserName(userName)){
+            throw new UserException(String.format("User with username %s not found", userName));
+        }
         return userRepository.findByUserName(userName);
     }
 
     @Override
-    public ResponseEntity<?> deleteUser(String userName){
+    public User deleteUser(String userName){
+        log.info("Request delete {}", userName);
+        if(userRepository.existsByUserName(userName)){
+            throw new UserException("User not found");
+        }
+       User user1 = userRepository.findByUserName(userName);
        userRepository.deleteUserByUserName(userName);
-        return null;
+        postRepository.deleteAllByAuthorOfThePost(userName);
+        commentRepository.deleteAllByAuthorOfPost(userName);
+        return user1;
     }
-//    @Override
-//    public ProfileDto mapUserToProfileDto(User user1) {
-//        return ProfileDto.builder()
-//
-//                .userName(user1.getUsername())
-//                .userPassword(user1.getUserPassword())
-//                .email(user1.getEmail())
-//                .country(user1.getCountry())
-//                .numberPhone(user1.getNumberPhone())
-//                .build();
-//    }
-//
-//    public void mapProfileDtoToUser(User user1, ProfileDto profileDto) {
-//        user1.setUserName(profileDto.getUserName());
-//        user1.setUserPassword(profileDto.getUserPassword());
-//        user1.setEmail(profileDto.getEmail());
-//        user1.setCountry(profileDto.getCountry());
-//        user1.setNumberPhone(profileDto.getNumberPhone());
-//    }
-
-//    public User saveProfile(User user1) {
-//        return userRepository.saveProfileDto(user1);
-//    }
 
     @Override
-    public boolean existByUserName(String userName) {
-        return userRepository.existsByUserName(userName);
+    public boolean existByUserName(String userName){
+      return   userRepository.existsByUserName(userName);
     }
 }

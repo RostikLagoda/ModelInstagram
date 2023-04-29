@@ -8,30 +8,26 @@ import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Builder
 @Entity
 @Data
-@Table(name="posts")
+@Table(name="comments")
 @AllArgsConstructor
 @NoArgsConstructor
 @Component
-public class Post {
+public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String title;
+    private long id;
+    private long postId;
+    private String authorOfPost;
     @Column(columnDefinition = "text")
-    private String description;
-    private String authorOfThePost;
-    private String image;
+    private String commentText;
 
     @ManyToOne
-    private User user;
-    @OneToMany
-    private List<Comment> comment;
+    private Post post;
 
     @Column(updatable = false)
     private LocalDateTime dateCreating;
