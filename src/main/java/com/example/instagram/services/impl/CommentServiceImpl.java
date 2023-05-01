@@ -36,7 +36,7 @@ public class CommentServiceImpl implements CommentService {
         userRepository.findByUserName(comment.getAuthorOfPost());
         Post currentPost = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException(String.format("Post %s not found", postId)));
-        comment.setPostId(currentPost.getId());
+        comment.setNewPostId(currentPost.getId());
         return commentRepository.save(comment);
     }
 

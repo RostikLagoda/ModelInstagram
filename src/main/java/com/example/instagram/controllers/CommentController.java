@@ -33,18 +33,18 @@ public class CommentController {
     private ModelMapper mapper;
 
     @PostMapping("/add/{postId}")
-    public ResponseEntity<?> add(@PathVariable @Positive long postId, @Valid @RequestBody SaveCommentDto saveCommentDto) {
+    public ResponseEntity<?> addComment(@PathVariable @Positive long postId, @Valid @RequestBody SaveCommentDto saveCommentDto) {
         Comment add = commentService.add(mapper.map(saveCommentDto, Comment.class), postId);
         return new ResponseEntity<>(mapper.map(add, ResponseCommentDto.class), HttpStatus.OK);
     }
 
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<?> delete(@PathVariable @Positive long commentId) {
+    public ResponseEntity<?> deleteComment(@PathVariable @Positive long commentId) {
         Comment delete = commentService.delete(commentId);
         return new ResponseEntity<>(mapper.map(delete, ResponseCommentDto.class), HttpStatus.OK);
     }
 
-    @GetMapping("/{postId}/getAll")
+    @GetMapping("/{postId}/get/comment")
     public ResponseEntity<?> getCommentsByPostId(@PathVariable @Positive long postId,
                                                  @RequestParam Optional<Integer> page,
                                                  @RequestParam Optional<Integer> size,
@@ -60,7 +60,7 @@ public class CommentController {
     }
 
     @PutMapping("/edit/{commentId}")
-    public ResponseEntity<?> edit(@PathVariable @Positive long commentId, @Valid @RequestBody UpdateCommentDto updateComment) {
+    public ResponseEntity<?> editComment(@PathVariable @Positive long commentId, @Valid @RequestBody UpdateCommentDto updateComment) {
         Comment edit = commentService.edit(commentId, updateComment.getDescription());
         return new ResponseEntity<>(mapper.map(edit, ResponseCommentDto.class), HttpStatus.OK);
     }

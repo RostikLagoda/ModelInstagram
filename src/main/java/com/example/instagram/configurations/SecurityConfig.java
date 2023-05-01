@@ -1,6 +1,9 @@
 package com.example.instagram.configurations;
 
+import com.example.instagram.entity.User;
 import com.example.instagram.entity.enums.Role;
+import com.example.instagram.exception.UserException;
+import com.example.instagram.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,13 +32,19 @@ public class SecurityConfig {
                                     .requestMatchers(HttpMethod.GET, "/user/get/all").permitAll()
                                     .requestMatchers(HttpMethod.POST, "/user/save/admin").hasAuthority(Role.ADMIN.getAuthority())
                                     .requestMatchers(HttpMethod.GET, "/user/profile").permitAll()
+                                    .requestMatchers(HttpMethod.PUT, "/user/update/profile").permitAll()
                                     .requestMatchers(HttpMethod.POST, "/user/registration").permitAll()
                                     .requestMatchers(HttpMethod.POST,"/user/auth").permitAll()
-                                    .requestMatchers(HttpMethod.DELETE, "/user/delete/user").hasAuthority(Role.ADMIN.getAuthority())
-                                    .requestMatchers(HttpMethod.POST, "/post/save").permitAll()
+                                    .requestMatchers(HttpMethod.DELETE, "/user/{username}").hasAuthority(Role.ADMIN.getAuthority())
+                                    .requestMatchers(HttpMethod.POST, "/post/save/post").permitAll()
                                     .requestMatchers(HttpMethod.GET, "/post/get/allPost").permitAll()
                                     .requestMatchers(HttpMethod.GET, "/post/get/title").permitAll()
                                     .requestMatchers(HttpMethod.DELETE, "/post/deletePost").permitAll()
+                                    .requestMatchers(HttpMethod.PUT, "/post/update/post").permitAll()
+                                    .requestMatchers(HttpMethod.POST, "/comment/add/{postId}").permitAll()
+                                    .requestMatchers(HttpMethod.DELETE, "/comment/{commentId}").permitAll()
+                                    .requestMatchers(HttpMethod.GET, "/comment/{postId}/getAll").permitAll()
+                                    .requestMatchers(HttpMethod.PUT, "/comment/edit/{commentId}").permitAll()
                                     .anyRequest()
                                     .authenticated();
                         }

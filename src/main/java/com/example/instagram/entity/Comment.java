@@ -20,8 +20,8 @@ public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-    private long postId;
+    private Long id;
+    private  Long newPostId;
     private String authorOfPost;
     @Column(columnDefinition = "text")
     private String commentText;

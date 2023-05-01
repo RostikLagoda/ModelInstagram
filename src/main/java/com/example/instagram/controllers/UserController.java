@@ -13,8 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -35,7 +33,7 @@ public class UserController {
     }
 
     @GetMapping("/get/all")
-    public ResponseEntity<List<User>> getAll(Model model, @RequestBody ProfileDto profileDto) {
+    public ResponseEntity<List<User>> getAll(Model model) {
         if(userService.getAllUsers().isEmpty()){
             model.addAttribute("message", "Пользователи не найдены");
         }
@@ -77,7 +75,7 @@ public class UserController {
     }
 
     @PostMapping("/auth")
-    public ResponseEntity<User> authorization(String username, String password, Model model, HttpSession mod) {
+    public ResponseEntity<User> authorization(@RequestParam String username,@RequestParam String password, Model model, HttpSession mod) {
         if (!userService.existByUserName(username)) {
             model.addAttribute("message", "Пользователя не существует.");
         } else {

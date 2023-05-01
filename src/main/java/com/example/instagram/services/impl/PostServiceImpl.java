@@ -1,6 +1,5 @@
 package com.example.instagram.services.impl;
 
-import com.example.instagram.dto.post.SavePostDto;
 import com.example.instagram.entity.Post;
 import com.example.instagram.entity.User;
 import com.example.instagram.exception.PostException;
@@ -29,7 +28,7 @@ public class PostServiceImpl implements PostService {
    private  UserService userService;
 
     @Override
-    public Post savePost(SavePostDto post1, String userName) {
+    public Post savePost(Post post1, String userName) {
         log.info(String.format("Request Post %s save by %s", post1.getTitle(), userName));
         User byUserName = userService.getByUserName(userName);
         Post post = Post.builder()
@@ -48,7 +47,7 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new PostException("Posts not found"));
     }
 
-    public Post update(Post updatedPost, Long postId) {
+    public Post updatePost (Post updatedPost, Long postId) {
         log.info(String.format("Request update Post by id %s", postId));
         Post postById = postRepository.findById(postId)
                 .orElseThrow(() -> new PostException(String.format("Post id%s not found", postId)));
@@ -70,12 +69,13 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void deletePostByTitle(String title) {
+    public Post deletePostByTitle(String title) {
         log.info("Request delete {}", title);
         Post postById =Optional.ofNullable(postRepository.findByTitle(title))
                 .orElseThrow(() -> new RuntimeException(String.format("Post title %s not found", title)));
         commentRepository.deleteAllByPostId(postById.getId());
         postRepository.delete(postById);
+        return postById;
     }
 }
 
