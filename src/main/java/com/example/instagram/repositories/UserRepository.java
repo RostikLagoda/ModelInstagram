@@ -9,7 +9,7 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-     User findByUserName(String username);
-    boolean existsByUserName(String username);
-    void deleteUserByUserName(String userName);
+     User findByName(String username);
+    boolean existsByName(String username);
+    void deleteUserByName(String userName);
 }

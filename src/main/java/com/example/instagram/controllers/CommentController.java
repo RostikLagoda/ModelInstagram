@@ -1,10 +1,12 @@
 package com.example.instagram.controllers;
 
 
+import com.example.instagram.dto.comment.GetCommentDto;
 import com.example.instagram.dto.comment.ResponseCommentDto;
 import com.example.instagram.dto.comment.SaveCommentDto;
 import com.example.instagram.dto.comment.UpdateCommentDto;
 import com.example.instagram.entity.Comment;
+import com.example.instagram.services.CommentService;
 import com.example.instagram.services.impl.CommentServiceImpl;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -18,7 +20,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -26,36 +27,37 @@ import java.util.stream.Collectors;
 @Validated
 public class CommentController {
 
-    @Autowired
-    private CommentServiceImpl commentService;
+    private final CommentService commentService;
+    private final ModelMapper mapper;
 
     @Autowired
-    private ModelMapper mapper;
+    public CommentController(CommentServiceImpl commentService, ModelMapper mapper) {
+        this.commentService = commentService;
+        this.mapper = mapper;
+    }
 
     @PostMapping("/add/{postId}")
-    public ResponseEntity<?> addComment(@PathVariable @Positive long postId, @Valid @RequestBody SaveCommentDto saveCommentDto) {
+    public ResponseEntity<ResponseCommentDto> addComment(@PathVariable @Positive long postId, @Valid @RequestBody SaveCommentDto saveCommentDto) {
         Comment add = commentService.add(mapper.map(saveCommentDto, Comment.class), postId);
         return new ResponseEntity<>(mapper.map(add, ResponseCommentDto.class), HttpStatus.OK);
     }
 
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<?> deleteComment(@PathVariable @Positive long commentId) {
-        Comment delete = commentService.delete(commentId);
+    public ResponseEntity<ResponseCommentDto> deleteComment(@PathVariable @Positive long commentId) {
+        Comment delete = commentService.deleteById(commentId);
         return new ResponseEntity<>(mapper.map(delete, ResponseCommentDto.class), HttpStatus.OK);
     }
 
     @GetMapping("/{postId}/get/comment")
-    public ResponseEntity<?> getCommentsByPostId(@PathVariable @Positive long postId,
-                                                 @RequestParam Optional<Integer> page,
-                                                 @RequestParam Optional<Integer> size,
-                                                 @RequestParam Optional<String> sortBy) {
-        List<ResponseCommentDto> commentDto = commentService.getCommentsByPostId(postId, (PageRequest.of(page.orElse(0),
-                        size.orElse(5),
-                        Sort.Direction.ASC,
-                        sortBy.orElse("postId"))))
-                .stream()
-                .map(comment -> mapper.map(comment, ResponseCommentDto.class))
-                .collect(Collectors.toList());
+    public ResponseEntity<List<ResponseCommentDto>> getCommentsByPostId(@PathVariable @Positive long postId,
+                                                            @RequestBody GetCommentDto getCommentDto) {
+        List<ResponseCommentDto> commentDto = commentService.getCommentsByPostId(postId, (PageRequest.of(getCommentDto.getPage().orElse(0),
+                                                                getCommentDto.getSize().orElse(5),
+                                                                Sort.Direction.ASC,
+                                                                getCommentDto.getSortBy().orElse("postId"))))
+                                                    .stream()
+                                                    .map(comment -> mapper.map(comment, ResponseCommentDto.class))
+                                                    .collect(Collectors.toList());
         return new ResponseEntity<>(commentDto, HttpStatus.OK);
     }
 

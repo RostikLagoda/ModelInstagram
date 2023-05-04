@@ -1,6 +1,5 @@
 package com.example.instagram.dto.post;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,7 +21,4 @@ public class SavePostDto {
     private String description;
     @NotBlank
     private String image;
-
-    @NotBlank
-    private String authorOfThePost;
 }

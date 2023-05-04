@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.sql.results.graph.Fetch;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -21,13 +22,15 @@ public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private  Long newPostId;
-    private String authorOfPost;
     @Column(columnDefinition = "text")
     private String commentText;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id")
     private Post post;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User user;
 
     @Column(updatable = false)
     private LocalDateTime dateCreating;

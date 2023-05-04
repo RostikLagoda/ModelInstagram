@@ -1,18 +1,19 @@
 package com.example.instagram.services;
 
-import com.example.instagram.dto.user.ProfileDto;
 import com.example.instagram.entity.User;
+import com.example.instagram.entity.enums.Role;
 
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
 
-    User saveUser(User user);
+    User savePerson(User user, Role role);
     List<User> getAllUsers();
     User saveProfile(User user);
-    User saveAdmin(User user);
-    User getByUserName(String userName);
-    User deleteUser(String userName);
-    boolean existByUserName(String userName);
+    Optional<User> getByName(String userName);
+    Optional<User> deleteUser(String userName);
+    boolean existByName(String userName);
+    Optional<User> findByName(String userName);
 }

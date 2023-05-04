@@ -25,12 +25,12 @@ public class Post {
     private String title;
     @Column(columnDefinition = "text")
     private String description;
-    private String authorOfThePost;
     private String image;
 
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
-    @OneToMany
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<Comment> comment;
 
     @Column(updatable = false)

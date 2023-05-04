@@ -23,6 +23,8 @@ import java.util.Map;
 @ControllerAdvice
 public class ExceptionController extends ResponseEntityExceptionHandler {
 
+    private static final String text = "Bad request by %s";
+
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers,
                                                                   HttpStatusCode status, WebRequest request) {
@@ -36,19 +38,19 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(UserException.class)
     public ResponseEntity<Object> handleMethodUserException(UserException UserEx){
-        log.warn(String.format("Bad request by %s", UserEx.getMessage()));
+        log.warn(String.format(text, UserEx.getMessage()));
         return new ResponseEntity<>(UserEx.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(PostException.class)
     public ResponseEntity<Object> handleMethodPostException(PostException PostEx){
-        log.warn(String.format("Bad request by %s", PostEx.getMessage()));
+        log.warn(String.format(text, PostEx.getMessage()));
         return new ResponseEntity<>(PostEx.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(CommentException.class)
     public ResponseEntity<Object> handleMethodCommentException(CommentException CommentEx){
-        log.warn(String.format("Bad request by %s", CommentEx.getMessage()));
+        log.warn(String.format(text, CommentEx.getMessage()));
         return new ResponseEntity<>(CommentEx.getMessage(), HttpStatus.BAD_REQUEST);
     }
     }

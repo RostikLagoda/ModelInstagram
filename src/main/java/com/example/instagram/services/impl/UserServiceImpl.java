@@ -3,14 +3,10 @@ package com.example.instagram.services.impl;
 import com.example.instagram.entity.User;
 import com.example.instagram.entity.enums.Role;
 import com.example.instagram.entity.enums.UserStatus;
-import com.example.instagram.exception.PostException;
 import com.example.instagram.exception.UserException;
-import com.example.instagram.repositories.CommentRepository;
-import com.example.instagram.repositories.PostRepository;
 import com.example.instagram.repositories.UserRepository;
 import com.example.instagram.services.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -26,43 +22,26 @@ import java.util.Set;
 @Slf4j
 public class UserServiceImpl implements UserService, UserDetailsService {
 
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private PostRepository postRepository;
-    @Autowired
-    private CommentRepository commentRepository;
-
-    @Autowired
+    private final UserRepository userRepository;
     @Lazy
-    private BCryptPasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    @Override
-    public User saveUser(User user) {
-        log.info("Request save User {}", user.getUsername());
-        if (userRepository.existsByUserName(user.getUsername())) {
-            throw new UserException(String.format("User with username %s not found", user.getUsername()));
-        }
-        User user1 = User.builder()
-                .status(UserStatus.ACTIVE)
-                .userName(user.getUsername())
-                .userPassword(passwordEncoder.encode(user.getPassword()))
-                .roleSet(Set.of(Role.USER))
-                .build();
-        return userRepository.save(user1);
+    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    public User saveAdmin(User user) {
-        log.info("Request save Admin {}", user.getUsername());
-        if (userRepository.existsByUserName(user.getUsername())) {
-            throw new UserException(String.format("Admin with username %s not found", user.getUsername()));
+    public User savePerson(User user, Role role) {
+        log.info("Request save User {}", user.getUsername());
+        if (userRepository.existsByName(user.getUsername())) {
+            throw new UserException(String.format("This user %s already exists", user.getUsername()));
         }
         User user1 = User.builder()
                 .status(UserStatus.ACTIVE)
-                .userName(user.getUsername())
-                .userPassword(passwordEncoder.encode(user.getPassword()))
-                .roleSet(Set.of(Role.ADMIN))
+                .name(user.getUsername())
+                .password(passwordEncoder.encode(user.getPassword()))
+                .roleSet(Set.of(role))
                 .build();
         return userRepository.save(user1);
     }
@@ -70,59 +49,64 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public User saveProfile(User user) {
         log.info("Request save profile {}", user.getUsername());
-        if(userRepository.existsByUserName(user.getUsername())) {
-            throw new UserException(String.format("Admin with username %s not found", user.getUsername()));
+        if(userRepository.existsByName(user.getUsername())) {
+            throw new UserException(String.format("This user %s with profile already exists", user.getUsername()));
         }
-        User user1 = User.builder()
-                .email(user.getEmail())
-                .country(user.getCountry())
-                .numberPhone(user.getNumberPhone())
-                .build();
-        return userRepository.save(user1);
+        User userDb = userRepository.findByName(user.getName());
+        if(userDb.getName().equals(user.getName())){
+            setProfileFields(userDb, user);
+            return userRepository.save(userDb);
+        }else{
+            throw new UserException("The names don't match");
+        }
+
     }
-
-
 
     @Override
     public List<User> getAllUsers() {
         log.info("Request All User");
         return Optional.of(userRepository.findAll())
-                .orElseThrow(() -> new PostException("Users not found"));
+                .orElseThrow(() -> new UserException("Users not found"));
     }
 
     @Override
-    public User getByUserName(String userName) {
+    public Optional<User> getByName(String userName) {
         log.info("Request get User by user name {}", userName);
-        if(userRepository.existsByUserName(userName)){
-            throw new UserException(String.format("User with username %s not found", userName));
-        }
-        return userRepository.findByUserName(userName);
+        return findByName(userName);
     }
 
     @Override
-    public User deleteUser(String userName){
+    public Optional<User> deleteUser(String userName){
         log.info("Request delete {}", userName);
-        if(userRepository.existsByUserName(userName)){
-            throw new UserException("User not found");
-        }
-       User user1 = userRepository.findByUserName(userName);
-       userRepository.deleteUserByUserName(userName);
-        postRepository.deleteAllByAuthorOfThePost(userName);
-        commentRepository.deleteAllByAuthorOfPost(userName);
+       Optional<User> user1 = findByName(userName);
+       userRepository.deleteUserByName(userName);
         return user1;
     }
 
     @Override
-    public boolean existByUserName(String userName){
-      return   userRepository.existsByUserName(userName);
+    public boolean existByName(String userName){
+      return   userRepository.existsByName(userName);
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUserName(username);
+        User user = userRepository.findByName(username);
         if(user==null){
             throw new UserException(String.format("User with username %s not found", username));
         }
         return user;
+    }
+
+    @Override
+    public Optional<User> findByName(String userName) {
+       return Optional.ofNullable(Optional.ofNullable(userRepository.findByName(userName))
+               .orElseThrow(() -> new UserException(String.format("User with username %s not found", userName))));
+    }
+
+    private void setProfileFields(User oldUser, User newUser){
+        oldUser.setName(newUser.getName());
+        oldUser.setEmail(newUser.getEmail());
+        oldUser.setCountry(newUser.getCountry());
+        oldUser.setNumberPhone(newUser.getNumberPhone());
     }
 }

@@ -20,31 +20,35 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final UserDetailsService userDetailsService;
+
     @Autowired
-    private UserDetailsService userDetailsService;
+    public SecurityConfig(UserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
                 .authorizeHttpRequests((auth) -> {
-                            auth.requestMatchers(HttpMethod.POST, "/user/save/user").permitAll()
-                                    .requestMatchers(HttpMethod.GET, "/user/get/all").permitAll()
+                            auth.requestMatchers(HttpMethod.POST, "/user/save/user").hasAuthority(Role.USER.getAuthority())
+                                    .requestMatchers(HttpMethod.GET, "/user/get/all").hasAuthority(Role.USER.getAuthority())
                                     .requestMatchers(HttpMethod.POST, "/user/save/admin").hasAuthority(Role.ADMIN.getAuthority())
-                                    .requestMatchers(HttpMethod.GET, "/user/profile").permitAll()
-                                    .requestMatchers(HttpMethod.PUT, "/user/update/profile").permitAll()
+                                    .requestMatchers(HttpMethod.GET, "/user/profile").hasAuthority(Role.USER.getAuthority())
+                                    .requestMatchers(HttpMethod.PUT, "/user/update/profile").hasAuthority(Role.USER.getAuthority())
                                     .requestMatchers(HttpMethod.POST, "/user/registration").permitAll()
-                                    .requestMatchers(HttpMethod.POST,"/user/auth").permitAll()
-                                    .requestMatchers(HttpMethod.DELETE, "/user/{username}").hasAuthority(Role.ADMIN.getAuthority())
-                                    .requestMatchers(HttpMethod.POST, "/post/save/post").permitAll()
-                                    .requestMatchers(HttpMethod.GET, "/post/get/allPost").permitAll()
-                                    .requestMatchers(HttpMethod.GET, "/post/get/title").permitAll()
-                                    .requestMatchers(HttpMethod.DELETE, "/post/deletePost").permitAll()
-                                    .requestMatchers(HttpMethod.PUT, "/post/update/post").permitAll()
-                                    .requestMatchers(HttpMethod.POST, "/comment/add/{postId}").permitAll()
-                                    .requestMatchers(HttpMethod.DELETE, "/comment/{commentId}").permitAll()
-                                    .requestMatchers(HttpMethod.GET, "/comment/{postId}/getAll").permitAll()
-                                    .requestMatchers(HttpMethod.PUT, "/comment/edit/{commentId}").permitAll()
+                                    .requestMatchers(HttpMethod.DELETE, "/user/{username}").hasAuthority(Role.USER.getAuthority())
+                                    .requestMatchers(HttpMethod.DELETE, "/user/admin/{username}").hasAuthority(Role.ADMIN.getAuthority())
+                                    .requestMatchers(HttpMethod.POST, "/post/save").hasAuthority(Role.USER.getAuthority())
+                                    .requestMatchers(HttpMethod.GET, "/post/allPost").hasAuthority(Role.USER.getAuthority())
+                                    .requestMatchers(HttpMethod.GET, "/post/{title}").hasAuthority(Role.USER.getAuthority())
+                                    .requestMatchers(HttpMethod.DELETE, "/post/delete/{title}").hasAuthority(Role.USER.getAuthority())
+                                    .requestMatchers(HttpMethod.PUT, "/post/updatePost").hasAuthority(Role.USER.getAuthority())
+                                    .requestMatchers(HttpMethod.POST, "/comment/add/{postId}").hasAuthority(Role.USER.getAuthority())
+                                    .requestMatchers(HttpMethod.DELETE, "/comment/{commentId}").hasAuthority(Role.USER.getAuthority())
+                                    .requestMatchers(HttpMethod.GET, "/comment//{postId}/get/comment").hasAuthority(Role.USER.getAuthority())
+                                    .requestMatchers(HttpMethod.PUT, "/comment/edit/{commentId}").hasAuthority(Role.USER.getAuthority())
                                     .anyRequest()
                                     .authenticated();
                         }
